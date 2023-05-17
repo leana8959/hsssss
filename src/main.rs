@@ -1,6 +1,7 @@
 mod ascii_animation;
 mod telnet_parser;
 use std::fs;
+use std::sync::Arc;
 use std::{thread::sleep, time::Duration};
 use tokio::time::{self, interval};
 
@@ -17,16 +18,19 @@ use tokio::{
 async fn main() -> Result<(), anyhow::Error> {
     let listener = TcpListener::bind("127.0.0.1:23").await?;
 
+    let backing_buffer = fs::read_to_string("frames.txt").expect("should have a frames file");
+    let shared_buffer = Arc::new(backing_buffer);
+
     loop {
+        let buffer = Arc::clone(&shared_buffer);
+
         let (mut socket, _) = listener.accept().await?;
 
         tokio::spawn(async move {
             let mut parser = TelnetParser::new();
-            let mut buf = [0; 1024];
+            let mut animation = AsciiAnimation::new(&buffer);
 
-            // HACK: don't read the file multiple times plz
-            let backing_buffer = fs::read_to_string("frames.txt").unwrap();
-            let mut animation = AsciiAnimation::new(&backing_buffer);
+            let mut buf = [0; 1024];
             let mut interval = time::interval(Duration::from_millis(50));
 
             while !parser.exit_now() {
@@ -35,9 +39,7 @@ async fn main() -> Result<(), anyhow::Error> {
                 select! {
                     value = socket.read(&mut buf) => {
                         match value {
-                            // HACK: remove the unwraps
                             Ok(n) => {
-                                // Protocol stuff
                                 parser.read_codes(&buf[..n]);
                                 socket
                                     .write(parser.respond())
@@ -50,11 +52,14 @@ async fn main() -> Result<(), anyhow::Error> {
 
                     _ = interval.tick() => {
                         animation.set_width(parser.width() as usize);
-                        socket.write(b"\x1bc").await.unwrap();
+                        socket
+                            .write(b"\x1bc")
+                            .await
+                            .expect("should clear screen");
                         socket
                             .write(animation.next_frame().as_bytes())
                             .await
-                            .unwrap();
+                            .expect("should send next frame");
                     }
                 }
 
