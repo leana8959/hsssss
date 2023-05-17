@@ -20,7 +20,7 @@ async fn main() -> Result<(), anyhow::Error> {
 
     // TODO: make this modular (cli option parser?)
     let backing_buffer = fs::read_to_string("frames.txt").expect("should have a frames file");
-    let shared_buffer = Arc::new(backing_buffer);
+    let shared_buffer: Arc<str> = backing_buffer.into();
 
     loop {
         let buffer = Arc::clone(&shared_buffer);

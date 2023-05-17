@@ -10,7 +10,7 @@ pub struct AsciiAnimation<'a> {
 }
 
 impl<'a> AsciiAnimation<'a> {
-    pub fn new(backing_buffer: &'a String) -> Self {
+    pub fn new(backing_buffer: &'a str) -> Self {
         AsciiAnimation {
             frames: backing_buffer.split(">\n").collect(),
             ..Default::default()
