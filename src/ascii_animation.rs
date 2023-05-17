@@ -2,8 +2,8 @@ use smallvec::SmallVec;
 
 #[derive(Default)]
 pub struct AsciiAnimation<'a> {
-    height: usize,
-    width: usize,
+    height: u8,
+    width: u8,
     frames: SmallVec<[&'a str; 1024]>,
     index: usize,
     backward: bool,
@@ -36,16 +36,20 @@ impl<'a> AsciiAnimation<'a> {
 
         self.frames[self.index]
             .split('\n')
-            .map(|line| " ".repeat(self.width / 2).to_string() + &line)
+            .map(|line| {
+                let pad_width =
+                    ((self.width as i32 - line.chars().count() as i32) / 2).clamp(0, 1024) as usize;
+                " ".repeat(pad_width).to_string() + &line
+            })
             .collect::<Vec<String>>()
             .join("\n")
     }
 
-    pub fn set_width(&mut self, width: usize) {
+    pub fn set_width(&mut self, width: u8) {
         self.width = width;
     }
 
-    pub fn set_height(&mut self, width: usize) {
+    pub fn set_height(&mut self, height: usize) {
         unimplemented!();
     }
 }

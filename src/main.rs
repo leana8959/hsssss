@@ -52,7 +52,7 @@ async fn main() -> Result<(), anyhow::Error> {
                     }
 
                     _ = interval.tick() => {
-                        animation.set_width(parser.width() as usize);
+                        animation.set_width(parser.width());
                         socket
                             .write(b"\x1bc")
                             .await
