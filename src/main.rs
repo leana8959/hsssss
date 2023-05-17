@@ -1,4 +1,9 @@
+mod ascii_animation;
 mod telnet_parser;
+use std::fs;
+use std::{thread::sleep, time::Duration};
+
+use ascii_animation::AsciiAnimation;
 use telnet_parser::TelnetParser;
 
 use tokio::{
@@ -16,21 +21,30 @@ async fn main() -> Result<(), anyhow::Error> {
         tokio::spawn(async move {
             let mut parser = TelnetParser::new();
             let mut buf = [0; 1024];
+
+            // HACK: don't read the file multiple times plz
+            let backing_buffer = fs::read_to_string("frames.txt").unwrap();
+            let mut animation = AsciiAnimation::new(&backing_buffer);
+
             while !parser.exit_now() {
                 parser.clear();
 
                 match socket.read(&mut buf).await {
                     // HACK: remove the unwraps
                     Ok(n) => {
+                        // Protocol stuff
                         parser.read_codes(&buf[..n]);
                         socket.write(parser.respond()).await.unwrap();
+
+                        // HACK:
+                        animation.set_width(parser.width() as usize);
+                        socket.write(b"\x1bc").await.unwrap();
                         socket
-                            .write(
-                                format!("width: {} height: {}\n", parser.width(), parser.height())
-                                    .as_bytes(),
-                            )
+                            .write(animation.next_frame().as_bytes())
                             .await
                             .unwrap();
+
+                        // sleep(Duration::from_millis(50))
                     }
                     Err(_) => (),
                 };
