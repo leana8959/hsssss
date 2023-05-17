@@ -22,3 +22,9 @@ to connect to this `telnet` server. Use `^C` to quit.
 # Frame file
 For modularity, I decided that a frame file is a text file that contains some ASCII artwork, where each frame is separated by a `>\n` (a `>` and then a new line character).
 Any other file of the same format should work just fine.
+
+# Credits & stuff used
+- [GrizzlT](https://github.com/GrizzlT) for the help with `tokio`
+- [Hykilpikonna](https://github.com/hykilpikonna) for the idea
+- [telnetlib](https://github.com/python/cpython/blob/main/Lib/telnetlib.py)
+- [RFC 854](https://www.rfc-editor.org/rfc/rfc854.html)
