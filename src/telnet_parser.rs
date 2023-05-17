@@ -43,7 +43,6 @@ impl TelnetParser {
     }
 
     pub fn read_codes(&mut self, codes: &[u8]) {
-        // use Commands::*;
         match codes {
             [] => (),
 

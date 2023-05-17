@@ -1,6 +1,9 @@
 mod ascii_animation;
+mod cli_parser;
 mod telnet_parser;
 
+use clap::Parser;
+use cli_parser::Args;
 use std::fs;
 use std::sync::Arc;
 use std::time::Duration;
@@ -17,9 +20,9 @@ use telnet_parser::TelnetParser;
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
     let listener = TcpListener::bind("127.0.0.1:23").await?;
+    let args = Args::parse();
 
-    // TODO: make this modular (cli option parser?)
-    let backing_buffer = fs::read_to_string("frames.txt").expect("should have a frames file");
+    let backing_buffer = fs::read_to_string(args.path).expect("should have a frames file");
     let shared_buffer: Arc<str> = backing_buffer.into();
 
     loop {
