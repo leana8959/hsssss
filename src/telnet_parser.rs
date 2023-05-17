@@ -46,11 +46,12 @@ impl TelnetParser {
         match codes {
             [] => (),
 
-            // Handle terminal size
+            // Responsd to terminal size request
             [IAC, WILL, NAWS, rest @ ..] => {
                 self.response.append(&mut vec![IAC, DO, NAWS]);
                 self.read_codes(rest);
             }
+            // Parse terminal size
             [IAC, SB, NAWS, 0, width, 0, height, IAC, SE, rest @ ..] => {
                 self.width = *width;
                 self.height = *height;
