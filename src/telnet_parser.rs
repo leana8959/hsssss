@@ -1,8 +1,3 @@
-use tokio::{
-    io::{AsyncReadExt, AsyncWriteExt},
-    net::TcpListener,
-};
-
 // Telnet protocol characters
 const IAC: u8 = 255; // "Interpret As Command"
 const DONT: u8 = 254;
@@ -100,4 +95,3 @@ impl TelnetParser {
         self.width
     }
 }
-
