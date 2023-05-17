@@ -5,4 +5,11 @@ use clap::Parser;
 pub struct Args {
     #[arg(long = "path", help = "provide path to the program", required = true)]
     pub path: String,
+
+    #[arg(
+        long = "addr",
+        help = "specify which address to bind to",
+        required = true
+    )]
+    pub address: String,
 }

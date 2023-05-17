@@ -9,7 +9,7 @@ Center the animation when the client-side's window dimension changes.
 
 # Usage
 ```sh
-hsssss --path [your_frame_file]
+hsssss --path [your_frame_file] --addr [address_to_bind_to]
 ```
 *Note*: You may need to use `sudo` to run this program, as `telnet` binds to port 23.
 

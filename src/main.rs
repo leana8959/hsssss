@@ -19,9 +19,9 @@ use telnet_parser::TelnetParser;
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
-    let listener = TcpListener::bind("127.0.0.1:23").await?;
     let args = Args::parse();
 
+    let listener = TcpListener::bind(format!("{}:23", args.address)).await?;
     let backing_buffer = fs::read_to_string(args.path).expect("should have a frames file");
     let shared_buffer: Arc<str> = backing_buffer.into();
 
