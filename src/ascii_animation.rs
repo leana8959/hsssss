@@ -34,7 +34,14 @@ impl<'a> AsciiAnimation<'a> {
             }
         }
 
-        self.frames[self.index]
+        let frame = self.frames[self.index];
+
+        let pad_height =
+            ((self.height as i32 - frame.split('\n').count() as i32) / 2).clamp(0, 1024) as usize;
+
+        let vert_padding = (" ".repeat(self.width as usize).to_string() + &"\n").repeat(pad_height);
+
+        let lines = frame
             .split('\n')
             .map(|line| {
                 let pad_width =
@@ -42,14 +49,16 @@ impl<'a> AsciiAnimation<'a> {
                 " ".repeat(pad_width).to_string() + &line
             })
             .collect::<Vec<String>>()
-            .join("\n")
+            .join("\n");
+
+        vert_padding + &lines
     }
 
     pub fn set_width(&mut self, width: u8) {
         self.width = width;
     }
 
-    pub fn set_height(&mut self, height: usize) {
-        unimplemented!();
+    pub fn set_height(&mut self, height: u8) {
+        self.height = height;
     }
 }
