@@ -1,17 +1,18 @@
+use smallvec::SmallVec;
+
 #[derive(Default)]
 pub struct AsciiAnimation<'a> {
     height: usize,
     width: usize,
-    frames: Vec<&'a str>,
+    frames: SmallVec<[&'a str; 1024]>,
     index: usize,
     backward: bool,
 }
 
 impl<'a> AsciiAnimation<'a> {
     pub fn new(backing_buffer: &'a String) -> Self {
-        let frames = backing_buffer.split(">\n").collect::<Vec<&str>>();
         AsciiAnimation {
-            frames,
+            frames: backing_buffer.split(">\n").collect(),
             ..Default::default()
         }
     }
