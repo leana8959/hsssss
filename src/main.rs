@@ -32,7 +32,7 @@ async fn main() -> Result<(), anyhow::Error> {
             let mut animation = AsciiAnimation::new(&buffer);
 
             let mut buf = [0; 1024];
-            let mut interval = time::interval(Duration::from_millis(50));
+            let mut interval = time::interval(Duration::from_millis(100));
 
             while !parser.exit_now() {
                 parser.clear();
@@ -55,11 +55,7 @@ async fn main() -> Result<(), anyhow::Error> {
                         animation.set_width(parser.width());
                         animation.set_height(parser.height());
                         socket
-                            .write(b"\x1bc")
-                            .await
-                            .expect("should clear screen");
-                        socket
-                            .write(animation.next_frame().as_bytes())
+                            .write(format!("\x1bc{}\nHit ^C to exit", animation.next_frame()).as_bytes())
                             .await
                             .expect("should send next frame");
                     }
