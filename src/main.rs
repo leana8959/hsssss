@@ -1,18 +1,18 @@
 mod ascii_animation;
 mod telnet_parser;
+
 use std::fs;
 use std::sync::Arc;
 use std::time::Duration;
-use tokio::time;
-
-use ascii_animation::AsciiAnimation;
-use telnet_parser::TelnetParser;
-
 use tokio::select;
+use tokio::time;
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::TcpListener,
 };
+
+use ascii_animation::AsciiAnimation;
+use telnet_parser::TelnetParser;
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
