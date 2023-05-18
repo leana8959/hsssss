@@ -17,6 +17,7 @@ impl<'a> AsciiAnimation<'a> {
     }
 
     pub fn next_frame(&mut self) -> &str {
+        #[allow(clippy::all)]
         if !self.backward {
             if self.index < self.frames.len() - 1 {
                 self.index += 1;
@@ -52,7 +53,7 @@ impl<'a> AsciiAnimation<'a> {
                     .map(|line| {
                         let pad_width = ((self.width as i32 - line.chars().count() as i32) / 2)
                             .clamp(0, 1024) as usize;
-                        format!("\x1b[{}C", pad_width) + &line
+                        format!("\x1b[{}C", pad_width) + line
                     })
                     .collect::<Vec<String>>()
                     .join("\n");

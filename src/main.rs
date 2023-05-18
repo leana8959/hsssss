@@ -42,15 +42,12 @@ async fn main() -> Result<(), anyhow::Error> {
 
                 select! {
                     value = socket.read(&mut buf) => {
-                        match value {
-                            Ok(n) => {
-                                parser.read_codes(&buf[..n]);
-                                socket
-                                    .write(parser.respond())
-                                    .await
-                                    .expect("should write the response");
-                            }
-                            Err(_) => (),
+                        if let Ok(n) = value {
+                            parser.read_codes(&buf[..n]);
+                            socket
+                                .write_all(parser.respond())
+                                .await
+                                .expect("should write the response");
                         }
                     }
 
@@ -58,14 +55,17 @@ async fn main() -> Result<(), anyhow::Error> {
                         animation.set_width(parser.width());
                         animation.set_height(parser.height());
                         socket
-                            .write(format!("\x1bc{}\nHit ^C to exit", animation.next_frame()).as_bytes())
+                            .write_all(format!("\x1bc{}\nHit ^C to exit", animation.next_frame()).as_bytes())
                             .await
                             .expect("should send next frame");
                     }
                 }
 
                 if parser.exit_now() {
-                    socket.write(b"\nByeee!\nLearn more: https://git.earth2077.fr/leana/hsssss\n").await.unwrap();
+                    socket
+                        .write_all(b"\nByeee!\nLearn more: https://git.earth2077.fr/leana/hsssss\n")
+                        .await
+                        .unwrap();
                     return;
                 };
             }
