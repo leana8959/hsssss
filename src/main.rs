@@ -65,7 +65,7 @@ async fn main() -> Result<(), anyhow::Error> {
                     socket
                         .write_all(b"\nByeee!\nLearn more: https://git.earth2077.fr/leana/hsssss\n")
                         .await
-                        .unwrap();
+                        .expect("should say bye");
                     return;
                 };
             }
