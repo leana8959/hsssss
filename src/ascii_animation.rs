@@ -1,10 +1,9 @@
-use smallvec::SmallVec;
-
 #[derive(Default)]
 pub struct AsciiAnimation<'a> {
-    height: u8,
     width: u8,
-    frames: SmallVec<[&'a str; 1024]>,
+    height: u8,
+    frames: Vec<&'a str>,
+    buffered_frames: Vec<String>,
     index: usize,
     backward: bool,
 }
@@ -17,7 +16,7 @@ impl<'a> AsciiAnimation<'a> {
         }
     }
 
-    pub fn next_frame(&mut self) -> String {
+    pub fn next_frame(&mut self) -> &str {
         if !self.backward {
             if self.index < self.frames.len() - 1 {
                 self.index += 1;
@@ -34,31 +33,45 @@ impl<'a> AsciiAnimation<'a> {
             }
         }
 
-        let frame = self.frames[self.index];
+        self.buffered_frames
+            .get(self.index)
+            .map(|buf_frames| buf_frames.as_ref())
+            .unwrap_or(self.frames[self.index])
+    }
 
-        let pad_height =
-            ((self.height as i32 - frame.split('\n').count() as i32) / 2).clamp(0, 1024) as usize;
+    fn update_buffered_frame(&mut self) {
+        let pad_height = ((self.height as i32 - self.frames[0].split('\n').count() as i32) / 2)
+            .clamp(0, 1024) as usize;
 
-        let vert_padding = (" ".repeat(self.width as usize).to_string() + &"\n").repeat(pad_height);
-
-        let lines = frame
-            .split('\n')
-            .map(|line| {
-                let pad_width =
-                    ((self.width as i32 - line.chars().count() as i32) / 2).clamp(0, 1024) as usize;
-                " ".repeat(pad_width).to_string() + &line
+        self.buffered_frames = self
+            .frames
+            .iter()
+            .map(|frame| {
+                let frame = frame
+                    .split('\n')
+                    .map(|line| {
+                        let pad_width = ((self.width as i32 - line.chars().count() as i32) / 2)
+                            .clamp(0, 1024) as usize;
+                        format!("\x1b[{}C", pad_width) + &line
+                    })
+                    .collect::<Vec<String>>()
+                    .join("\n");
+                format!("\x1b[{}B{}", pad_height, frame)
             })
-            .collect::<Vec<String>>()
-            .join("\n");
-
-        vert_padding + &lines
+            .collect();
     }
 
     pub fn set_width(&mut self, width: u8) {
-        self.width = width;
+        if self.width != width {
+            self.width = width;
+            self.update_buffered_frame();
+        }
     }
 
     pub fn set_height(&mut self, height: u8) {
-        self.height = height;
+        if self.height != height {
+            self.height = height;
+            self.update_buffered_frame();
+        }
     }
 }
