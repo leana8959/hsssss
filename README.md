@@ -1,5 +1,3 @@
-Hi there :wave:
-
 This is a bodged-together `telnet` server that, when you connect to it, shows you a little animation of a snake flicking its tongue.
 
 # Features
