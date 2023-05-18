@@ -37,7 +37,7 @@ async fn main() -> Result<(), anyhow::Error> {
             let mut buf = [0; 1024];
             let mut interval = time::interval(Duration::from_millis(100));
 
-            while !parser.exit_now() {
+            loop {
                 parser.clear();
 
                 select! {
@@ -65,7 +65,8 @@ async fn main() -> Result<(), anyhow::Error> {
                 }
 
                 if parser.exit_now() {
-                    socket.write(b"Byeeeee #Clawthorn #TOH\n").await.unwrap();
+                    socket.write(b"\nByeee!\nLearn more: https://git.earth2077.fr/leana/hsssss\n").await.unwrap();
+                    return;
                 };
             }
         });
