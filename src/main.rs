@@ -28,7 +28,9 @@ async fn main() -> Result<(), anyhow::Error> {
     loop {
         let buffer = Arc::clone(&shared_buffer);
 
-        let (mut socket, _) = listener.accept().await?;
+        let (mut socket, addr) = listener.accept().await?;
+
+        println!("Connection from: {}", addr);
 
         tokio::spawn(async move {
             let mut parser = TelnetParser::new();
@@ -66,6 +68,8 @@ async fn main() -> Result<(), anyhow::Error> {
                         .write_all(b"\nByeee!\nLearn more: https://git.earth2077.fr/leana/hsssss\n")
                         .await
                         .expect("should say bye");
+                    socket.shutdown().await.unwrap();
+                    println!("Closing connection from: {}", addr);
                     return;
                 };
             }
