@@ -1,3 +1,5 @@
+use std::time::{Duration, Instant};
+
 // Telnet protocol characters
 const IAC: u8 = 255; // "Interpret As Command"
 const DONT: u8 = 254;
@@ -22,19 +24,22 @@ const GA: u8 = 249; // Go Ahead;
 const NAWS: u8 = 31;
 const TM: u8 = 6;
 
-#[derive(Default)]
 pub struct TelnetParser {
     width: u8,
     height: u8,
     response: Vec<u8>,
     exit_now: bool,
+    created: Instant,
 }
 
 impl TelnetParser {
     pub fn new() -> Self {
         TelnetParser {
             response: Vec::with_capacity(1024),
-            ..Default::default()
+            width: 0,
+            height: 0,
+            exit_now: false,
+            created: Instant::now(),
         }
     }
 
@@ -82,6 +87,10 @@ impl TelnetParser {
 
     pub fn respond(&self) -> &[u8] {
         &self.response[..]
+    }
+
+    pub fn created(&self) -> Instant {
+        self.created
     }
 
     pub fn exit_now(&self) -> bool {

@@ -7,6 +7,7 @@ use cli_parser::Args;
 use std::fs;
 use std::sync::Arc;
 use std::time::Duration;
+use std::time::Instant;
 use tokio::select;
 use tokio::time;
 use tokio::{
@@ -70,7 +71,9 @@ async fn main() -> Result<(), anyhow::Error> {
                     }
                 }
 
-                if parser.exit_now() {
+                if parser.exit_now()
+                    || Instant::now().duration_since(parser.created()) > Duration::from_secs(5)
+                {
                     err_break!(
                         socket
                             .write_all(
