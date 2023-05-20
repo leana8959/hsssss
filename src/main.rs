@@ -17,6 +17,14 @@ use tokio::{
 use ascii_animation::AsciiAnimation;
 use telnet_parser::TelnetParser;
 
+macro_rules! err_break {
+    ($e:expr) => {
+        if let Err(_) = $e {
+            break;
+        }
+    };
+}
+
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
     let args = Args::parse();
@@ -47,33 +55,35 @@ async fn main() -> Result<(), anyhow::Error> {
                     value = socket.read(&mut buf) => {
                         if let Ok(n) = value {
                             parser.read_codes(&buf[..n]);
-                            socket
-                                .write_all(parser.respond())
-                                .await
-                                .expect("should write the response");
+                            err_break!(socket.write_all(parser.respond()).await);
                         }
                     }
 
                     _ = interval.tick() => {
                         animation.set_width(parser.width());
                         animation.set_height(parser.height());
-                        socket
-                            .write_all(format!("\x1bc{}\nHit ^C to exit", animation.next_frame()).as_bytes())
-                            .await
-                            .expect("should send next frame");
+                        err_break!(
+                            socket
+                                .write_all(format!("\x1bc{}\nHit ^C to exit", animation.next_frame()).as_bytes())
+                                .await
+                        )
                     }
                 }
 
                 if parser.exit_now() {
-                    socket
-                        .write_all(b"\nByeee!\nLearn more: https://git.earth2077.fr/leana/hsssss\n")
-                        .await
-                        .expect("should say bye");
+                    err_break!(
+                        socket
+                            .write_all(
+                                b"\nByeee!\nLearn more: https://git.earth2077.fr/leana/hsssss\n"
+                            )
+                            .await
+                    );
                     socket.shutdown().await.unwrap();
-                    println!("Closing connection from: {}", addr);
-                    return;
+                    break;
                 };
             }
+
+            println!("Closing connection from: {}", addr);
         });
     }
 }
