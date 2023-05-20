@@ -72,7 +72,7 @@ async fn main() -> Result<(), anyhow::Error> {
                 }
 
                 if parser.exit_now()
-                    || Instant::now().duration_since(parser.created()) > Duration::from_secs(5)
+                    || Instant::now().duration_since(parser.created()) > Duration::from_secs(60)
                 {
                     err_break!(
                         socket
