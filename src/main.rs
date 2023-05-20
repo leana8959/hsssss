@@ -48,6 +48,7 @@ async fn main() -> Result<(), anyhow::Error> {
 
             let mut buf = [0; 1024];
             let mut interval = time::interval(Duration::from_millis(100));
+            let created = Instant::now();
 
             loop {
                 parser.clear();
@@ -72,7 +73,7 @@ async fn main() -> Result<(), anyhow::Error> {
                 }
 
                 if parser.exit_now()
-                    || Instant::now().duration_since(parser.created()) > Duration::from_secs(60)
+                    || Instant::now().duration_since(created) > Duration::from_secs(60)
                 {
                     err_break!(
                         socket
