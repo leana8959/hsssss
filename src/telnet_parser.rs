@@ -65,12 +65,13 @@ impl TelnetParser {
                 self.read_codes(rest);
             }
 
+            // https://stackoverflow.com/a/10418479/16509232
             [IAC, DO, option, rest @ ..] => {
                 self.response.append(&mut vec![IAC, WONT, *option]);
                 self.read_codes(rest);
             }
             [IAC, WILL, option, rest @ ..] => {
-                self.response.append(&mut vec![IAC, WONT, *option]);
+                self.response.append(&mut vec![IAC, DONT, *option]);
                 self.read_codes(rest);
             }
             _ => {
