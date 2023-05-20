@@ -8,7 +8,7 @@ pub struct Args {
 
     #[arg(
         long = "addr",
-        help = "specify which address to bind to",
+        help = "specify which address to bind to. format: [addr:port]",
         required = true
     )]
     pub address: String,

@@ -21,7 +21,7 @@ use telnet_parser::TelnetParser;
 async fn main() -> Result<(), anyhow::Error> {
     let args = Args::parse();
 
-    let listener = TcpListener::bind(format!("{}:23", args.address)).await?;
+    let listener = TcpListener::bind(args.address).await?;
     let backing_buffer = fs::read_to_string(args.path).expect("should have a frames file");
     let shared_buffer: Arc<str> = backing_buffer.into();
 
@@ -33,6 +33,7 @@ async fn main() -> Result<(), anyhow::Error> {
         println!("Connection from: {}", addr);
 
         tokio::spawn(async move {
+            // TODO: limit connection time
             let mut parser = TelnetParser::new();
             let mut animation = AsciiAnimation::new(&buffer);
 
