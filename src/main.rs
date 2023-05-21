@@ -45,12 +45,11 @@ async fn main() -> Result<(), anyhow::Error> {
         let (mut socket, addr) = listener.accept().await?;
 
         if connected.lock().unwrap().contains(&addr.ip()) {
-            println!("contained");
+            println!("Blocked {addr} from connecting");
             continue;
         }
 
         connected.lock().unwrap().insert(addr.ip());
-        dbg!(&connected);
 
         println!("Connection from: {}", addr);
 
