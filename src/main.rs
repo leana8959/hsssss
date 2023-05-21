@@ -4,8 +4,11 @@ mod telnet_parser;
 
 use clap::Parser;
 use cli_parser::Args;
+use std::collections::HashSet;
 use std::fs;
+use std::net::IpAddr;
 use std::sync::Arc;
+use std::sync::Mutex;
 use std::time::Duration;
 use std::time::Instant;
 use tokio::select;
@@ -33,16 +36,25 @@ async fn main() -> Result<(), anyhow::Error> {
     let listener = TcpListener::bind(args.address).await?;
     let backing_buffer = fs::read_to_string(args.path).expect("should have a frames file");
     let shared_buffer: Arc<str> = backing_buffer.into();
+    let connected: Arc<Mutex<HashSet<IpAddr>>> = Arc::new(Mutex::new(HashSet::new()));
 
     loop {
         let buffer = Arc::clone(&shared_buffer);
+        let connected = Arc::clone(&connected);
 
         let (mut socket, addr) = listener.accept().await?;
+
+        if connected.lock().unwrap().contains(&addr.ip()) {
+            println!("contained");
+            continue;
+        }
+
+        connected.lock().unwrap().insert(addr.ip());
+        dbg!(&connected);
 
         println!("Connection from: {}", addr);
 
         tokio::spawn(async move {
-            // TODO: limit connection time
             let mut parser = TelnetParser::new();
             let mut animation = AsciiAnimation::new(&buffer);
 
@@ -87,7 +99,9 @@ async fn main() -> Result<(), anyhow::Error> {
                 };
             }
 
+            // end of `spawn` block
             println!("Closing connection from: {}", addr);
+            connected.lock().unwrap().remove(&addr.ip());
         });
     }
 }
